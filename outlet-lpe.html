@@ -127,6 +127,7 @@
     box-shadow:0 3px 0 rgba(0,0,0,0.12), 0 10px 18px -12px rgba(0,0,0,0.35);
     overflow:visible;
     transition:transform .15s ease;
+    cursor:pointer;
   }
   .card.selected{outline:3px solid var(--teal); transform:translateY(-2px);}
   .card-img-wrap{
@@ -394,6 +395,38 @@
   .delivery-card .dc-price{font-size:11.5px; color:#6b6146; margin-top:5px; line-height:1.3;}
   .delivery-card .dc-price .amount{font-weight:700; color:var(--stamp); font-family:'Space Mono',monospace;}
   .delivery-note{font-size:11px; color:#8a7f68; margin-top:8px; line-height:1.4;}
+
+  /* ---------- BOOK DETAIL MODAL ---------- */
+  .book-modal{
+    background:var(--paper); border-radius:12px;
+    max-width:480px; width:100%; max-height:90vh; overflow-y:auto;
+    box-shadow:0 20px 50px rgba(0,0,0,0.4);
+    position:relative;
+  }
+  .book-modal-close{
+    position:absolute; top:12px; right:12px; z-index:3;
+    background:rgba(15,58,74,0.75); color:#fff; border:none;
+    width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .book-modal-img-wrap{
+    height:380px; background:var(--kraft-dark);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; border-radius:12px 12px 0 0; overflow:hidden;
+  }
+  .book-modal-img-wrap img{width:100%; height:100%; object-fit:contain; background:var(--ink);}
+  .book-modal-img-wrap .placeholder-icon{font-size:70px;}
+  .book-modal-img-wrap .gallery-arrow{width:34px; height:34px; font-size:17px;}
+  .book-modal-img-wrap .gallery-dots span{width:7px; height:7px;}
+  .book-modal-body{padding:20px 22px 24px;}
+  .book-modal-body .tag{position:static; display:inline-block; transform:rotate(-2deg); margin-bottom:10px;}
+  .book-modal-title{font-size:20px; font-weight:700; color:var(--navy); margin:0 0 10px;}
+  .book-modal-detail{font-size:14px; color:#5b5142; line-height:1.55; margin:0 0 16px; white-space:pre-wrap;}
+  .book-modal-price-row{display:flex; align-items:baseline; gap:10px; margin-bottom:18px;}
+  .book-modal-price-row .price-now{font-size:26px;}
+  .book-modal-price-row .price-old{font-size:15px;}
+  .book-modal-pick-btn{width:100%; padding:13px; border-radius:8px; border:2px solid var(--navy); background:transparent; color:var(--navy); font-weight:700; font-size:14.5px; cursor:pointer;}
+  .book-modal-pick-btn.active{background:var(--teal); border-color:var(--teal-dark); color:#fff;}
 </style>
 </head>
 <body>
@@ -519,6 +552,13 @@ function renderCatalog(){
     });
   });
 
+  grid.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.pick-btn') || e.target.closest('.gallery-arrow')) return;
+      openBookModal(card.dataset.open);
+    });
+  });
+
   updateCartBar();
 }
 
@@ -546,7 +586,7 @@ function cardHtml(b){
       <div class="gallery-dots">${images.map((_,i)=>`<span class="${i===idx?'active':''}"></span>`).join('')}</div>` : '';
 
   return `
-    <div class="card ${isSelected?'selected':''}">
+    <div class="card ${isSelected?'selected':''}" data-open="${b.id}">
       ${isLast ? '<div class="tag">ÚLTIMA UNIDAD</div>' : ''}
       <div class="card-img-wrap">${imgTag}${galleryControls}</div>
       <div class="card-body">
@@ -559,6 +599,70 @@ function cardHtml(b){
         <button class="pick-btn ${isSelected?'active':''}" data-id="${b.id}">${isSelected ? '✓ Elegido' : 'Elegir'}</button>
       </div>
     </div>`;
+}
+
+// ---------- BOOK DETAIL MODAL ----------
+function openBookModal(id){
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.id = 'bookModalOverlay';
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  renderBookModal(id);
+}
+
+function renderBookModal(id){
+  const overlay = document.getElementById('bookModalOverlay');
+  if(!overlay) return;
+  const b = books.find(bk => bk.id === id);
+  if(!b){ overlay.remove(); return; }
+
+  const isSelected = selected.has(b.id);
+  const isLast = b.units === 1;
+  const images = getImages(b);
+  const idx = galleryIndex[b.id] || 0;
+
+  let imgTag;
+  if(images.length === 0){
+    imgTag = `<div class="placeholder-icon">📕</div>`;
+  } else {
+    imgTag = `<img src="${escapeAttr(images[idx] || images[0])}" alt="${escapeAttr(b.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;placeholder-icon&quot;>📕</div>'">`;
+  }
+  const galleryControls = images.length > 1 ? `
+      <button class="gallery-arrow prev" data-modal-gallery="${b.id}" data-dir="-1">‹</button>
+      <button class="gallery-arrow next" data-modal-gallery="${b.id}" data-dir="1">›</button>
+      <div class="gallery-dots">${images.map((_,i)=>`<span class="${i===idx?'active':''}"></span>`).join('')}</div>` : '';
+
+  overlay.innerHTML = `
+    <div class="book-modal">
+      <button class="book-modal-close" id="closeBookModal">✕</button>
+      <div class="book-modal-img-wrap">${imgTag}${galleryControls}</div>
+      <div class="book-modal-body">
+        ${isLast ? '<div class="tag">ÚLTIMA UNIDAD</div>' : ''}
+        <p class="book-modal-title">${escapeHtml(b.title)}</p>
+        ${b.detail ? `<p class="book-modal-detail">${escapeHtml(b.detail)}</p>` : ''}
+        <div class="book-modal-price-row">
+          <span class="price-now mono">${money(b.price)}</span>
+          ${b.originalPrice ? `<span class="price-old mono">${money(b.originalPrice)}</span>` : ''}
+        </div>
+        <button class="book-modal-pick-btn ${isSelected?'active':''}" id="modalPickBtn">${isSelected ? '✓ Elegido' : 'Elegir este libro'}</button>
+      </div>
+    </div>`;
+
+  document.getElementById('closeBookModal').addEventListener('click', ()=> overlay.remove());
+  document.getElementById('modalPickBtn').addEventListener('click', ()=>{
+    if(selected.has(b.id)) selected.delete(b.id); else selected.add(b.id);
+    renderCatalog();
+    renderBookModal(id);
+  });
+  overlay.querySelectorAll('[data-modal-gallery]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const dir = parseInt(btn.dataset.dir);
+      const current = galleryIndex[id] || 0;
+      galleryIndex[id] = (current + dir + images.length) % images.length;
+      renderBookModal(id);
+    });
+  });
 }
 
 function updateCartBar(){
