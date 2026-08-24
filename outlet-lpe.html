@@ -380,6 +380,20 @@
   .wpp-cta:disabled{opacity:0.55; cursor:not-allowed; box-shadow:none;}
   .trust-line{text-align:center; font-size:11px; color:#8a7f68; margin-top:10px;}
   .co-error{color:var(--stamp); font-size:12px; margin-top:8px; text-align:center;}
+
+  .delivery-options{display:flex; gap:12px; margin-bottom:4px;}
+  .delivery-card{
+    flex:1; border:2px solid var(--kraft-deep); border-radius:8px;
+    padding:14px 10px; text-align:center; cursor:pointer; background:#fff;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .delivery-card:hover{border-color:var(--teal);}
+  .delivery-card.active{border-color:var(--teal); background:rgba(3,184,172,0.08);}
+  .delivery-card .dc-icon{font-size:22px;}
+  .delivery-card .dc-label{font-weight:700; font-size:13px; color:var(--navy); margin-top:6px;}
+  .delivery-card .dc-price{font-size:11.5px; color:#6b6146; margin-top:5px; line-height:1.3;}
+  .delivery-card .dc-price .amount{font-weight:700; color:var(--stamp); font-family:'Space Mono',monospace;}
+  .delivery-note{font-size:11px; color:#8a7f68; margin-top:8px; line-height:1.4;}
 </style>
 </head>
 <body>
@@ -599,10 +613,25 @@ function openCheckout(){
           </div>
           <div class="co-field">
             <label>¿Cómo lo recibís?</label>
-            <select id="co_delivery">
-              <option value="Envío">Envío a domicilio</option>
-              <option value="Retiro">Retiro en persona</option>
-            </select>
+            <div class="delivery-options">
+              <div class="delivery-card active" id="dc_domicilio" data-value="Envío a domicilio">
+                <div class="dc-icon">🏠</div>
+                <div class="dc-label">A Domicilio</div>
+                <div class="dc-price">desde <span class="amount">$10.500</span></div>
+              </div>
+              <div class="delivery-card" id="dc_sucursal" data-value="Envío a sucursal">
+                <div class="dc-icon">📦</div>
+                <div class="dc-label">A Sucursal</div>
+                <div class="dc-price">desde <span class="amount">$7.000</span></div>
+              </div>
+            </div>
+            <div class="delivery-note">Precio promedio-referencial de envío, no está incluido en el total — el costo exacto se confirma por WhatsApp.</div>
+          </div>
+          <div id="addressFields">
+            <div class="co-field">
+              <label>Dirección completa</label>
+              <input type="text" id="co_address" placeholder="Calle, número, piso/depto">
+            </div>
           </div>
         </div>
         <div id="coErrorBox"></div>
@@ -625,7 +654,20 @@ function openCheckout(){
   document.body.appendChild(page);
   document.getElementById('backToCatalog').addEventListener('click', ()=> page.remove());
   document.getElementById('wppCtaBtn').addEventListener('click', submitCheckout);
+
+  document.getElementById('dc_domicilio').addEventListener('click', ()=> selectDelivery('domicilio'));
+  document.getElementById('dc_sucursal').addEventListener('click', ()=> selectDelivery('sucursal'));
+  selectDelivery('domicilio');
+
   renderCheckoutSummary();
+}
+
+let selectedDeliveryType = 'domicilio';
+function selectDelivery(type){
+  selectedDeliveryType = type;
+  document.getElementById('dc_domicilio').classList.toggle('active', type === 'domicilio');
+  document.getElementById('dc_sucursal').classList.toggle('active', type === 'sucursal');
+  document.getElementById('addressFields').style.display = type === 'domicilio' ? 'block' : 'none';
 }
 
 function renderCheckoutSummary(){
@@ -664,7 +706,7 @@ function submitCheckout(){
   const name = document.getElementById('co_name').value.trim();
   const phone = document.getElementById('co_phone').value.trim();
   const location = document.getElementById('co_location').value.trim();
-  const delivery = document.getElementById('co_delivery').value;
+  const address = document.getElementById('co_address') ? document.getElementById('co_address').value.trim() : '';
   const errorBox = document.getElementById('coErrorBox');
 
   if(!name || !phone){
@@ -677,7 +719,11 @@ function submitCheckout(){
   const total = chosen.reduce((s,b)=>s+Number(b.price),0);
   const lines = chosen.map((b,i)=> `${i+1}. ${b.title} — ${money(b.price)}`).join('\n');
 
-  const msg = `¡Hola! Vi el Outlet de LPE y quiero encargar estos libros:\n\n${lines}\n\nTotal: ${money(total)}\n\n— Datos —\nNombre: ${name}\nTeléfono: ${phone}\n${location ? `Localidad: ${location}\n` : ''}Entrega: ${delivery}\n\nQuedo atento/a para coordinar 🙌`;
+  const deliveryLabel = selectedDeliveryType === 'domicilio'
+    ? `Envío a domicilio (referencial: ${money(10500)})`
+    : `Envío a sucursal (referencial: ${money(7000)})`;
+
+  const msg = `¡Hola! Vi el Outlet de LPE y quiero encargar estos libros:\n\n${lines}\n\nTotal: ${money(total)}\n\n— Datos —\nNombre: ${name}\nTeléfono: ${phone}\n${location ? `Localidad: ${location}\n` : ''}Entrega: ${deliveryLabel}\n${selectedDeliveryType === 'domicilio' && address ? `Dirección: ${address}\n` : ''}\nQuedo atento/a para coordinar 🙌`;
 
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
