@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outlet LPE — Últimas unidades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --kraft:#d9c8a3;
+    --kraft-dark:#c3ac7e;
+    --kraft-deep:#a98f5c;
+    --ink:#241a10;
+    --stamp:#b5382b;
+    --teal:#03b8ac;
+    --teal-dark:#028f86;
+    --navy:#0f3a4a;
+    --paper:#f6efdc;
+    --paper-2:#efe4c8;
+    --wpp:#25d366;
+    --wpp-dark:#1da851;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--kraft);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.035) 0px, rgba(0,0,0,0.035) 1px, transparent 1px, transparent 3px),
+      linear-gradient(180deg, var(--kraft) 0%, var(--kraft-dark) 100%);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding-bottom:90px;
+  }
+  .display{font-family:'Anton',sans-serif; letter-spacing:0.5px;}
+  .mono{font-family:'Space Mono',monospace;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:38px 20px 46px;
+    text-align:center;
+    background:var(--navy);
+    color:var(--paper);
+    clip-path: polygon(0 0,100% 0,100% 92%,97% 100%,94% 91%,91% 100%,88% 91%,85% 100%,82% 91%,79% 100%,76% 91%,73% 100%,70% 91%,67% 100%,64% 91%,61% 100%,58% 91%,55% 100%,52% 91%,49% 100%,46% 91%,43% 100%,40% 91%,37% 100%,34% 91%,31% 100%,28% 91%,25% 100%,22% 91%,19% 100%,16% 91%,13% 100%,10% 91%,7% 100%,4% 91%,1% 100%,0 92%);
+  }
+  .hero-eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:12px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:10px;
+  }
+  .hero h1{
+    font-size:clamp(34px,7vw,58px);
+    margin:0;
+    line-height:0.95;
+    transform:rotate(-1.5deg);
+    text-shadow:2px 2px 0 rgba(0,0,0,0.25);
+  }
+  .hero p{
+    max-width:520px;
+    margin:14px auto 0;
+    font-size:14.5px;
+    color:#cfe4e6;
+    line-height:1.5;
+  }
+  .stock-stamp{
+    display:inline-block;
+    border:3px solid var(--stamp);
+    color:var(--stamp);
+    background:rgba(181,56,43,0.08);
+    font-family:'Anton',sans-serif;
+    padding:5px 14px;
+    margin-top:16px;
+    transform:rotate(-4deg);
+    letter-spacing:1px;
+    font-size:13px;
+  }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 18px;
+    background:var(--paper-2);
+    border-bottom:2px dashed var(--kraft-deep);
+    font-size:13px;
+  }
+  .topbar-brand{font-weight:700; color:var(--navy);}
+  .search-wrap{padding:16px 18px 4px;}
+  .search-wrap input{
+    width:100%;
+    padding:12px 14px;
+    border:2px solid var(--kraft-deep);
+    border-radius:8px;
+    background:var(--paper);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .search-wrap input:focus{outline:2px solid var(--teal); border-color:var(--teal);}
+
+  /* ---------- GRID ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:22px 18px;
+    padding:22px 18px 10px;
+    max-width:1100px;
+    margin:0 auto;
+  }
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--kraft-deep);
+    font-size:14px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--paper);
+    border-radius:6px;
+    box-shadow:0 3px 0 rgba(0,0,0,0.12), 0 10px 18px -12px rgba(0,0,0,0.35);
+    overflow:visible;
+    transition:transform .15s ease;
+  }
+  .card.selected{outline:3px solid var(--teal); transform:translateY(-2px);}
+  .card-img-wrap{
+    height:190px;
+    border-radius:6px 6px 0 0;
+    overflow:hidden;
+    background:var(--kraft-dark);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card-img-wrap img{width:100%; height:100%; object-fit:cover; display:block;}
+  .placeholder-icon{font-size:44px; opacity:0.55;}
+
+  .tag{
+    position:absolute;
+    top:-14px; right:12px;
+    background:var(--stamp);
+    color:#fff;
+    font-family:'Anton',sans-serif;
+    font-size:11px;
+    padding:4px 8px;
+    transform:rotate(4deg);
+    border-radius:3px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.25);
+  }
+
+  .card-body{padding:14px 14px 16px;}
+  .card-title{font-weight:700; font-size:15px; color:var(--navy); margin:0 0 6px; line-height:1.25;}
+  .card-detail{
+    font-size:12.5px;
+    color:#5b5142;
+    line-height:1.45;
+    margin:0 0 12px;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .price-row{display:flex; align-items:baseline; gap:8px; margin-bottom:12px;}
+  .price-now{font-family:'Space Mono',monospace; font-weight:700; font-size:19px; color:var(--stamp);}
+  .price-old{font-family:'Space Mono',monospace; font-size:12.5px; color:#8a7f68; text-decoration:line-through;}
+
+  .pick-btn{
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    border:2px solid var(--navy);
+    background:transparent;
+    color:var(--navy);
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .pick-btn.active{
+    background:var(--teal);
+    border-color:var(--teal-dark);
+    color:#fff;
+  }
+  .pick-btn:hover{opacity:0.85;}
+
+  /* ---------- CART BAR ---------- */
+  .cartbar{
+    position:fixed; left:0; right:0; bottom:0;
+    background:var(--navy);
+    color:#fff;
+    padding:12px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    box-shadow:0 -6px 18px rgba(0,0,0,0.25);
+    z-index:40;
+  }
+  .cartbar .count{font-size:12.5px; color:#bcd8da;}
+  .cartbar .total{font-family:'Space Mono',monospace; font-weight:700; font-size:18px;}
+  .wpp-btn{
+    background:var(--teal);
+    color:#08201f;
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+    white-space:nowrap;
+  }
+  .wpp-btn:disabled{background:#3d5157; color:#8ba0a3; cursor:not-allowed;}
+
+  /* ---------- FOOTER / ADMIN LINK ---------- */
+  .footer-link{
+    text-align:center;
+    padding:26px 10px 100px;
+  }
+  .footer-link button{
+    background:none; border:none;
+    font-size:11.5px; color:#8a7f68;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+
+  /* ---------- MODAL (pin + admin) ---------- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(20,15,8,0.55);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px; z-index:100;
+  }
+  .modal{
+    background:var(--paper); border-radius:10px;
+    max-width:420px; width:100%;
+    padding:24px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.35);
+  }
+  .modal h2{margin:0 0 14px; font-size:18px; color:var(--navy);}
+  .modal input, .modal textarea{
+    width:100%; padding:10px 12px; margin-bottom:10px;
+    border:1.5px solid var(--kraft-deep); border-radius:6px;
+    font-family:'Inter',sans-serif; font-size:13.5px; background:#fff;
+  }
+  .modal textarea{resize:vertical; min-height:60px;}
+  .modal label{font-size:12px; font-weight:600; color:var(--navy); display:block; margin-bottom:4px;}
+  .field{margin-bottom:10px;}
+  .modal-actions{display:flex; gap:10px; margin-top:6px;}
+  .btn{padding:10px 16px; border-radius:6px; border:none; font-weight:600; font-size:13px; cursor:pointer;}
+  .btn-primary{background:var(--teal); color:#fff;}
+  .btn-secondary{background:#e7dcc2; color:var(--ink);}
+  .btn-danger{background:var(--stamp); color:#fff;}
+  .error-msg{color:var(--stamp); font-size:12.5px; margin-bottom:8px;}
+
+  /* ---------- ADMIN PANEL ---------- */
+  .admin-panel{
+    position:fixed; inset:0; background:var(--paper);
+    z-index:90; overflow-y:auto;
+  }
+  .admin-header{
+    background:var(--navy); color:#fff; padding:16px 20px;
+    display:flex; justify-content:space-between; align-items:center;
+    position:sticky; top:0; z-index:5;
+  }
+  .admin-header h2{margin:0; font-size:16px;}
+  .admin-body{max-width:640px; margin:0 auto; padding:22px 18px 60px;}
+  .admin-section-title{font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--kraft-deep); margin:26px 0 10px; font-weight:700;}
+  .admin-book-row{
+    display:flex; gap:12px; align-items:center;
+    background:#fff; border:1px solid #e5d8b8; border-radius:8px;
+    padding:10px 12px; margin-bottom:8px;
+  }
+  .admin-book-row img{width:44px; height:56px; object-fit:cover; border-radius:4px; background:var(--kraft);}
+  .admin-book-info{flex:1; min-width:0;}
+  .admin-book-info .t{font-weight:600; font-size:13.5px; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .admin-book-info .p{font-size:12px; color:#7a7059;}
+  .admin-book-actions{display:flex; gap:6px;}
+  .icon-btn{
+    border:none; background:var(--kraft); border-radius:5px;
+    width:30px; height:30px; cursor:pointer; font-size:14px;
+  }
+  .icon-btn.danger{background:#f6d9d5;}
+  .hint{font-size:11.5px; color:#8a7f68; margin-top:2px; margin-bottom:14px; line-height:1.4;}
+  .toast{
+    position:fixed; bottom:100px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:10px 18px; border-radius:20px;
+    font-size:13px; z-index:200; opacity:0; transition:opacity .25s ease;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;}
+  .loading{text-align:center; padding:60px 20px; color:var(--kraft-deep); font-size:13.5px;}
+
+  /* ---------- CHECKOUT ---------- */
+  .checkout-page{
+    position:fixed; inset:0; background:var(--kraft);
+    z-index:80; overflow-y:auto;
+  }
+  .checkout-topbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 22px; background:var(--paper-2); border-bottom:2px dashed var(--kraft-deep);
+  }
+  .back-link{
+    background:none; border:none; color:var(--navy); font-weight:600; font-size:13.5px;
+    cursor:pointer; display:flex; align-items:center; gap:4px;
+  }
+  .checkout-brand{font-family:'Anton',sans-serif; font-size:14px; color:var(--kraft-deep); letter-spacing:1px;}
+  .checkout-wrap{
+    max-width:980px; margin:0 auto; padding:30px 20px 80px;
+    display:grid; grid-template-columns:1.3fr 1fr; gap:26px;
+  }
+  @media (max-width:760px){ .checkout-wrap{grid-template-columns:1fr;} }
+  .checkout-title{font-family:'Anton',sans-serif; font-size:28px; color:var(--navy); margin:0 0 20px; letter-spacing:0.5px;}
+  .co-card{
+    background:var(--paper); border-radius:10px; padding:20px 20px 22px;
+    margin-bottom:18px; box-shadow:0 3px 0 rgba(0,0,0,0.08), 0 8px 16px -10px rgba(0,0,0,0.25);
+  }
+  .co-step-label{font-weight:700; font-size:14.5px; color:var(--navy); margin:0 0 14px;}
+  .co-field{margin-bottom:12px;}
+  .co-field label{display:block; font-size:12px; font-weight:600; color:#6b6146; margin-bottom:5px;}
+  .co-field input, .co-field select{
+    width:100%; padding:10px 12px; border:1.5px solid var(--kraft-deep); border-radius:6px;
+    font-family:'Inter',sans-serif; font-size:13.5px; background:#fff; color:var(--ink);
+  }
+  .co-field input:focus{outline:2px solid var(--teal); border-color:var(--teal);}
+  .co-row{display:flex; gap:12px;}
+  .co-row .co-field{flex:1;}
+
+  .summary-card{
+    background:#fff; border-radius:10px; padding:20px;
+    box-shadow:0 3px 0 rgba(0,0,0,0.08), 0 8px 16px -10px rgba(0,0,0,0.25);
+    position:sticky; top:20px; height:fit-content;
+  }
+  .summary-card h3{margin:0 0 14px; font-size:15px; color:var(--navy);}
+  .summary-item{display:flex; gap:10px; align-items:center; padding:10px 0; border-bottom:1px solid #eee2c8;}
+  .summary-item img{width:38px; height:50px; object-fit:cover; border-radius:3px; background:var(--kraft);}
+  .summary-item .placeholder-icon{font-size:22px; width:38px; text-align:center;}
+  .summary-item-info{flex:1; min-width:0;}
+  .summary-item-info .t{font-size:13px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .summary-item-info .p{font-family:'Space Mono',monospace; font-size:12.5px; color:var(--stamp); margin-top:2px;}
+  .summary-item .rm{background:none; border:none; color:#a89a78; cursor:pointer; font-size:15px; padding:4px;}
+  .summary-totals{margin-top:14px; padding-top:12px; border-top:1px dashed var(--kraft-deep); font-size:13px;}
+  .summary-totals .row{display:flex; justify-content:space-between; margin-bottom:8px; color:#5b5142;}
+  .summary-totals .row.total{font-weight:700; font-size:16.5px; color:var(--ink); margin-top:10px;}
+  .summary-totals .row.total .mono{font-family:'Space Mono',monospace;}
+
+  .co-badge{
+    display:inline-block; background:#f6c453; color:#5c4400; font-size:10.5px; font-weight:700;
+    padding:3px 10px; border-radius:12px; margin-bottom:-6px; position:relative; top:8px; left:12px; z-index:2;
+  }
+  .wpp-cta{
+    width:100%; background:var(--wpp); border:none; border-radius:10px;
+    padding:14px 16px; margin-top:16px; cursor:pointer; text-align:center;
+    box-shadow:0 3px 0 var(--wpp-dark);
+  }
+  .wpp-cta .main{color:#fff; font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; gap:8px;}
+  .wpp-cta .sub{color:#eafff0; font-size:11.5px; margin-top:3px;}
+  .wpp-cta:disabled{opacity:0.55; cursor:not-allowed; box-shadow:none;}
+  .trust-line{text-align:center; font-size:11px; color:#8a7f68; margin-top:10px;}
+  .co-error{color:var(--stamp); font-size:12px; margin-top:8px; text-align:center;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-eyebrow">Libros Para Emprendedor</div>
+  <h1 class="display">OUTLET</h1>
+  <p>Libros con algún detalle (tapa marcada, canto golpeado, sobrante de stock) a precios muy por debajo de la web. Elegí los que quieras y cerramos el pedido por WhatsApp.</p>
+  <div class="stock-stamp display">HASTA AGOTAR STOCK</div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-brand">📚 Outlet LPE</div>
+  <div id="bookCountLabel" class="mono"></div>
+</div>
+
+<div class="search-wrap">
+  <input type="text" id="searchInput" placeholder="Buscar por título...">
+</div>
+
+<div id="grid" class="grid"></div>
+
+<div id="cartbar" class="cartbar" style="display:none;">
+  <div>
+    <div class="count" id="cartCount">0 libros elegidos</div>
+    <div class="total mono" id="cartTotal">$0</div>
+  </div>
+  <button class="wpp-btn" id="wppBtn" disabled>
+    <span>Finalizar pedido</span> →
+  </button>
+</div>
+
+<div class="footer-link">
+  <button id="adminLinkBtn">Panel de gestión</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const WHATSAPP_NUMBER = "5493756442037"; // sin + ni espacios
+const ADMIN_PIN = "2026"; // cambiá este PIN directamente acá en el código
+
+let books = [];
+let selected = new Set();
+let searchTerm = "";
+
+// ---------- STORAGE ----------
+async function loadBooks(){
+  document.getElementById('grid').innerHTML = '<div class="loading">Cargando catálogo...</div>';
+  try{
+    const res = await window.storage.get('outlet-books', true);
+    books = res && res.value ? JSON.parse(res.value) : [];
+  }catch(e){
+    books = [];
+  }
+  renderCatalog();
+  if(document.getElementById('adminPanel')) renderAdminList();
+}
+
+async function saveBooks(){
+  try{
+    await window.storage.set('outlet-books', JSON.stringify(books), true);
+    return true;
+  }catch(e){
+    showToast('Error al guardar. Probá de nuevo.');
+    return false;
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function money(n){
+  return '$' + Number(n).toLocaleString('es-AR');
+}
+
+// ---------- CATALOG (PUBLIC) ----------
+function renderCatalog(){
+  const grid = document.getElementById('grid');
+  const available = books.filter(b => (b.units === undefined || b.units > 0));
+  const filtered = available.filter(b => b.title.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  document.getElementById('bookCountLabel').textContent = available.length + ' disponibles';
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="empty-state">${available.length===0 ? 'Todavía no hay libros publicados. ¡Volvé pronto!' : 'No encontramos libros con ese título.'}</div>`;
+  } else {
+    grid.innerHTML = filtered.map(b => cardHtml(b)).join('');
+  }
+
+  grid.querySelectorAll('.pick-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.id;
+      if(selected.has(id)) selected.delete(id); else selected.add(id);
+      renderCatalog();
+    });
+  });
+
+  updateCartBar();
+}
+
+function cardHtml(b){
+  const isSelected = selected.has(b.id);
+  const isLast = b.units === 1;
+  const imgTag = b.image
+    ? `<img src="${escapeAttr(b.image)}" alt="${escapeAttr(b.title)}" onerror="this.parentElement.innerHTML='<div class=&quot;placeholder-icon&quot;>📕</div>'">`
+    : `<div class="placeholder-icon">📕</div>`;
+  return `
+    <div class="card ${isSelected?'selected':''}">
+      ${isLast ? '<div class="tag">ÚLTIMA UNIDAD</div>' : ''}
+      <div class="card-img-wrap">${imgTag}</div>
+      <div class="card-body">
+        <p class="card-title">${escapeHtml(b.title)}</p>
+        ${b.detail ? `<p class="card-detail">${escapeHtml(b.detail)}</p>` : ''}
+        <div class="price-row">
+          <span class="price-now mono">${money(b.price)}</span>
+          ${b.originalPrice ? `<span class="price-old mono">${money(b.originalPrice)}</span>` : ''}
+        </div>
+        <button class="pick-btn ${isSelected?'active':''}" data-id="${b.id}">${isSelected ? '✓ Elegido' : 'Elegir'}</button>
+      </div>
+    </div>`;
+}
+
+function updateCartBar(){
+  const bar = document.getElementById('cartbar');
+  const chosen = books.filter(b => selected.has(b.id));
+  if(chosen.length === 0){
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  const total = chosen.reduce((s,b)=>s+Number(b.price),0);
+  document.getElementById('cartCount').textContent = chosen.length + (chosen.length===1?' libro elegido':' libros elegidos');
+  document.getElementById('cartTotal').textContent = money(total);
+  const wppBtn = document.getElementById('wppBtn');
+  wppBtn.disabled = false;
+}
+
+document.getElementById('wppBtn').addEventListener('click', ()=>{
+  const chosen = books.filter(b => selected.has(b.id));
+  if(chosen.length === 0) return;
+  openCheckout();
+});
+
+// ---------- CHECKOUT ----------
+function openCheckout(){
+  const page = document.createElement('div');
+  page.className = 'checkout-page';
+  page.id = 'checkoutPage';
+  page.innerHTML = `
+    <div class="checkout-topbar">
+      <button class="back-link" id="backToCatalog">← Volver al catálogo</button>
+      <div class="checkout-brand">OUTLET LPE</div>
+    </div>
+    <div class="checkout-wrap">
+      <div>
+        <h1 class="checkout-title">Finalizar pedido</h1>
+        <div class="co-card">
+          <p class="co-step-label">Tus datos</p>
+          <div class="co-field">
+            <label>Nombre completo</label>
+            <input type="text" id="co_name" placeholder="Nombre y apellido">
+          </div>
+          <div class="co-row">
+            <div class="co-field">
+              <label>Teléfono</label>
+              <input type="text" id="co_phone" placeholder="Para coordinar por WhatsApp">
+            </div>
+            <div class="co-field">
+              <label>Localidad</label>
+              <input type="text" id="co_location" placeholder="Ciudad / Provincia">
+            </div>
+          </div>
+          <div class="co-field">
+            <label>¿Cómo lo recibís?</label>
+            <select id="co_delivery">
+              <option value="Envío">Envío a domicilio</option>
+              <option value="Retiro">Retiro en persona</option>
+            </select>
+          </div>
+        </div>
+        <div id="coErrorBox"></div>
+      </div>
+
+      <div>
+        <span class="co-badge">RECOMENDADO</span>
+        <div class="summary-card">
+          <h3>Resumen del pedido</h3>
+          <div id="summaryItems"></div>
+          <div class="summary-totals" id="summaryTotals"></div>
+          <button class="wpp-cta" id="wppCtaBtn">
+            <div class="main">💬 Continuar por WhatsApp</div>
+            <div class="sub">Coordinás pago y envío con nosotros</div>
+          </button>
+          <div class="trust-line">🔒 Cerrás la compra directo con LPE, sin intermediarios</div>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(page);
+  document.getElementById('backToCatalog').addEventListener('click', ()=> page.remove());
+  document.getElementById('wppCtaBtn').addEventListener('click', submitCheckout);
+  renderCheckoutSummary();
+}
+
+function renderCheckoutSummary(){
+  const chosen = books.filter(b => selected.has(b.id));
+  const itemsBox = document.getElementById('summaryItems');
+  itemsBox.innerHTML = chosen.map(b => `
+    <div class="summary-item" data-id="${b.id}">
+      ${b.image ? `<img src="${escapeAttr(b.image)}" onerror="this.outerHTML='<div class=&quot;placeholder-icon&quot;>📕</div>'">` : '<div class="placeholder-icon">📕</div>'}
+      <div class="summary-item-info">
+        <div class="t">${escapeHtml(b.title)}</div>
+        <div class="p">${money(b.price)}</div>
+      </div>
+      <button class="rm" data-id="${b.id}" title="Quitar">🗑</button>
+    </div>`).join('');
+
+  itemsBox.querySelectorAll('.rm').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      selected.delete(btn.dataset.id);
+      renderCatalog();
+      if(selected.size === 0){
+        document.getElementById('checkoutPage').remove();
+      } else {
+        renderCheckoutSummary();
+      }
+    });
+  });
+
+  const total = chosen.reduce((s,b)=>s+Number(b.price),0);
+  document.getElementById('summaryTotals').innerHTML = `
+    <div class="row"><span>Subtotal (${chosen.length} ${chosen.length===1?'libro':'libros'})</span><span class="mono">${money(total)}</span></div>
+    <div class="row"><span>Envío</span><span>A coordinar</span></div>
+    <div class="row total"><span>TOTAL</span><span class="mono">${money(total)}</span></div>`;
+}
+
+function submitCheckout(){
+  const name = document.getElementById('co_name').value.trim();
+  const phone = document.getElementById('co_phone').value.trim();
+  const location = document.getElementById('co_location').value.trim();
+  const delivery = document.getElementById('co_delivery').value;
+  const errorBox = document.getElementById('coErrorBox');
+
+  if(!name || !phone){
+    errorBox.innerHTML = '<div class="co-error">Completá al menos tu nombre y teléfono para continuar.</div>';
+    return;
+  }
+  errorBox.innerHTML = '';
+
+  const chosen = books.filter(b => selected.has(b.id));
+  const total = chosen.reduce((s,b)=>s+Number(b.price),0);
+  const lines = chosen.map((b,i)=> `${i+1}. ${b.title} — ${money(b.price)}`).join('\n');
+
+  const msg = `¡Hola! Vi el Outlet de LPE y quiero encargar estos libros:\n\n${lines}\n\nTotal: ${money(total)}\n\n— Datos —\nNombre: ${name}\nTeléfono: ${phone}\n${location ? `Localidad: ${location}\n` : ''}Entrega: ${delivery}\n\nQuedo atento/a para coordinar 🙌`;
+
+  const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  searchTerm = e.target.value;
+  renderCatalog();
+});
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(str){ return escapeHtml(str); }
+
+// ---------- ADMIN ACCESS ----------
+document.getElementById('adminLinkBtn').addEventListener('click', openPinModal);
+
+function openPinModal(){
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.id = 'pinOverlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h2>Panel de gestión</h2>
+      <div id="pinError" class="error-msg" style="display:none;">PIN incorrecto.</div>
+      <input type="password" id="pinInput" placeholder="PIN" inputmode="numeric">
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="pinSubmit">Entrar</button>
+        <button class="btn btn-secondary" id="pinCancel">Cancelar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('pinInput').focus();
+  document.getElementById('pinCancel').addEventListener('click', ()=> overlay.remove());
+  document.getElementById('pinSubmit').addEventListener('click', checkPin);
+  document.getElementById('pinInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkPin(); });
+}
+
+function checkPin(){
+  const val = document.getElementById('pinInput').value;
+  if(val === ADMIN_PIN){
+    document.getElementById('pinOverlay').remove();
+    openAdminPanel();
+  } else {
+    document.getElementById('pinError').style.display = 'block';
+  }
+}
+
+// ---------- ADMIN PANEL ----------
+function openAdminPanel(){
+  const panel = document.createElement('div');
+  panel.className = 'admin-panel';
+  panel.id = 'adminPanel';
+  panel.innerHTML = `
+    <div class="admin-header">
+      <h2>Publicar libros — Outlet LPE</h2>
+      <button class="btn btn-secondary" id="closeAdmin">Cerrar</button>
+    </div>
+    <div class="admin-body">
+      <div class="admin-section-title">Nuevo libro</div>
+      <div class="field">
+        <label>Título</label>
+        <input type="text" id="f_title" placeholder="Ej: Padre Rico, Padre Pobre">
+      </div>
+      <div class="field">
+        <label>Detalle / defecto</label>
+        <textarea id="f_detail" placeholder="Ej: Tapa con marca de humedad en la esquina inferior, interior perfecto"></textarea>
+      </div>
+      <div class="field" style="display:flex; gap:10px;">
+        <div style="flex:1;">
+          <label>Precio remate</label>
+          <input type="number" id="f_price" placeholder="8000">
+        </div>
+        <div style="flex:1;">
+          <label>Precio original (opcional)</label>
+          <input type="number" id="f_original" placeholder="15000">
+        </div>
+      </div>
+      <div class="field">
+        <label>URL de la foto</label>
+        <input type="text" id="f_image" placeholder="https://...">
+        <div class="hint">Subí la foto a un servicio como postimages.org, imgur o tu Google Drive (con enlace público) y pegá acá el link directo a la imagen.</div>
+      </div>
+      <div class="field">
+        <label>Unidades disponibles</label>
+        <input type="number" id="f_units" placeholder="1" value="1" min="0">
+      </div>
+      <button class="btn btn-primary" id="addBookBtn" style="width:100%; padding:12px;">Publicar libro</button>
+
+      <div class="admin-section-title">Libros publicados (<span id="adminBookCount">0</span>)</div>
+      <div id="adminList"></div>
+    </div>`;
+  document.body.appendChild(panel);
+  document.getElementById('closeAdmin').addEventListener('click', ()=> panel.remove());
+  document.getElementById('addBookBtn').addEventListener('click', handleAddBook);
+  renderAdminList();
+}
+
+async function handleAddBook(){
+  const title = document.getElementById('f_title').value.trim();
+  const detail = document.getElementById('f_detail').value.trim();
+  const price = parseFloat(document.getElementById('f_price').value);
+  const original = document.getElementById('f_original').value ? parseFloat(document.getElementById('f_original').value) : null;
+  const image = document.getElementById('f_image').value.trim();
+  const units = document.getElementById('f_units').value !== '' ? parseInt(document.getElementById('f_units').value) : 1;
+
+  if(!title || isNaN(price)){
+    showToast('Completá al menos el título y el precio.');
+    return;
+  }
+
+  books.push({
+    id: 'b' + Date.now() + Math.floor(Math.random()*1000),
+    title, detail, price,
+    originalPrice: original,
+    image, units
+  });
+
+  const ok = await saveBooks();
+  if(ok){
+    showToast('Libro publicado ✓');
+    document.getElementById('f_title').value='';
+    document.getElementById('f_detail').value='';
+    document.getElementById('f_price').value='';
+    document.getElementById('f_original').value='';
+    document.getElementById('f_image').value='';
+    document.getElementById('f_units').value='1';
+    renderAdminList();
+    renderCatalog();
+  }
+}
+
+function renderAdminList(){
+  const list = document.getElementById('adminList');
+  if(!list) return;
+  document.getElementById('adminBookCount').textContent = books.length;
+  if(books.length === 0){
+    list.innerHTML = '<div class="hint">Todavía no publicaste ningún libro.</div>';
+    return;
+  }
+  list.innerHTML = books.slice().reverse().map(b => `
+    <div class="admin-book-row">
+      ${b.image ? `<img src="${escapeAttr(b.image)}" onerror="this.style.display='none'">` : '<div style="width:44px;height:56px;background:var(--kraft);border-radius:4px;"></div>'}
+      <div class="admin-book-info">
+        <div class="t">${escapeHtml(b.title)}</div>
+        <div class="p">${money(b.price)} · ${b.units===undefined ? '1' : b.units} unid.${b.units===0?' · agotado':''}</div>
+      </div>
+      <div class="admin-book-actions">
+        <button class="icon-btn" title="Restar unidad" data-action="dec" data-id="${b.id}">−</button>
+        <button class="icon-btn" title="Sumar unidad" data-action="inc" data-id="${b.id}">+</button>
+        <button class="icon-btn danger" title="Eliminar" data-action="del" data-id="${b.id}">🗑</button>
+      </div>
+    </div>`).join('');
+
+  list.querySelectorAll('[data-action]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      const book = books.find(b => b.id === id);
+      if(!book) return;
+      if(action === 'del'){
+        if(!confirm('¿Eliminar "' + book.title + '" del outlet?')) return;
+        books = books.filter(b => b.id !== id);
+      } else if(action === 'inc'){
+        book.units = (book.units === undefined ? 1 : book.units) + 1;
+      } else if(action === 'dec'){
+        book.units = Math.max(0, (book.units === undefined ? 1 : book.units) - 1);
+      }
+      const ok = await saveBooks();
+      if(ok){ renderAdminList(); renderCatalog(); }
+    });
+  });
+}
+
+loadBooks();
+</script>
+</body>
+</html>
