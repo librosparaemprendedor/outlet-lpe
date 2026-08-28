@@ -889,7 +889,7 @@ function openAdminPanel(){
       <button class="btn btn-secondary" id="closeAdmin">Cerrar</button>
     </div>
     <div class="admin-body">
-      <div class="admin-section-title">Nuevo libro</div>
+      <div class="admin-section-title" id="formSectionTitle">Nuevo libro</div>
       <div class="field">
         <label>Título</label>
         <input type="text" id="f_title" placeholder="Ej: Padre Rico, Padre Pobre">
@@ -917,15 +917,56 @@ function openAdminPanel(){
         <label>Unidades disponibles</label>
         <input type="number" id="f_units" placeholder="1" value="1" min="0">
       </div>
-      <button class="btn btn-primary" id="addBookBtn" style="width:100%; padding:12px;">Publicar libro</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary" id="addBookBtn" style="flex:1; padding:12px;">Publicar libro</button>
+        <button class="btn btn-secondary" id="cancelEditBtn" style="display:none;">Cancelar</button>
+      </div>
 
       <div class="admin-section-title">Libros publicados (<span id="adminBookCount">0</span>)</div>
       <div id="adminList"></div>
     </div>`;
   document.body.appendChild(panel);
-  document.getElementById('closeAdmin').addEventListener('click', ()=> panel.remove());
+  document.getElementById('closeAdmin').addEventListener('click', ()=> { editingBookId = null; panel.remove(); });
   document.getElementById('addBookBtn').addEventListener('click', handleAddBook);
+  document.getElementById('cancelEditBtn').addEventListener('click', exitEditMode);
   renderAdminList();
+}
+
+let editingBookId = null;
+
+function fillForm(b){
+  document.getElementById('f_title').value = b.title || '';
+  document.getElementById('f_detail').value = b.detail || '';
+  document.getElementById('f_price').value = b.price !== undefined ? b.price : '';
+  document.getElementById('f_original').value = b.originalPrice || '';
+  document.getElementById('f_image').value = getImages(b).join('\n');
+  document.getElementById('f_units').value = b.units !== undefined ? b.units : 1;
+}
+
+function clearForm(){
+  document.getElementById('f_title').value = '';
+  document.getElementById('f_detail').value = '';
+  document.getElementById('f_price').value = '';
+  document.getElementById('f_original').value = '';
+  document.getElementById('f_image').value = '';
+  document.getElementById('f_units').value = '1';
+}
+
+function enterEditMode(book){
+  editingBookId = book.id;
+  fillForm(book);
+  document.getElementById('formSectionTitle').textContent = 'Editando: ' + book.title;
+  document.getElementById('addBookBtn').textContent = 'Guardar cambios';
+  document.getElementById('cancelEditBtn').style.display = 'inline-block';
+  document.getElementById('formSectionTitle').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function exitEditMode(){
+  editingBookId = null;
+  clearForm();
+  document.getElementById('formSectionTitle').textContent = 'Nuevo libro';
+  document.getElementById('addBookBtn').textContent = 'Publicar libro';
+  document.getElementById('cancelEditBtn').style.display = 'none';
 }
 
 async function handleAddBook(){
@@ -942,6 +983,25 @@ async function handleAddBook(){
     return;
   }
 
+  if(editingBookId){
+    const updatedBook = {
+      id: editingBookId,
+      title, detail, price,
+      originalPrice: original,
+      images, units
+    };
+    const ok = await apiCall({action:'update', book:updatedBook});
+    if(ok){
+      const idx = books.findIndex(b => b.id === editingBookId);
+      if(idx !== -1) books[idx] = updatedBook;
+      showToast('Cambios guardados ✓');
+      exitEditMode();
+      renderAdminList();
+      renderCatalog();
+    }
+    return;
+  }
+
   const newBook = {
     id: 'b' + Date.now() + Math.floor(Math.random()*1000),
     title, detail, price,
@@ -953,12 +1013,7 @@ async function handleAddBook(){
   if(ok){
     books.push(newBook);
     showToast('Libro publicado ✓');
-    document.getElementById('f_title').value='';
-    document.getElementById('f_detail').value='';
-    document.getElementById('f_price').value='';
-    document.getElementById('f_original').value='';
-    document.getElementById('f_image').value='';
-    document.getElementById('f_units').value='1';
+    clearForm();
     renderAdminList();
     renderCatalog();
   }
@@ -982,6 +1037,7 @@ function renderAdminList(){
         <div class="p">${money(b.price)} · ${b.units===undefined ? '1' : b.units} unid.${b.units===0?' · agotado':''}${imgs.length>1?` · ${imgs.length} fotos`:''}</div>
       </div>
       <div class="admin-book-actions">
+        <button class="icon-btn" title="Editar" data-action="edit" data-id="${b.id}">✏️</button>
         <button class="icon-btn" title="Restar unidad" data-action="dec" data-id="${b.id}">−</button>
         <button class="icon-btn" title="Sumar unidad" data-action="inc" data-id="${b.id}">+</button>
         <button class="icon-btn danger" title="Eliminar" data-action="del" data-id="${b.id}">🗑</button>
@@ -995,6 +1051,11 @@ function renderAdminList(){
       const action = btn.dataset.action;
       const book = books.find(b => b.id === id);
       if(!book) return;
+
+      if(action === 'edit'){
+        enterEditMode(book);
+        return;
+      }
 
       if(action === 'del'){
         if(!confirm('¿Eliminar "' + book.title + '" del outlet?')) return;
